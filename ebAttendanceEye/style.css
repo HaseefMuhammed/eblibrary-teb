@@ -1,0 +1,168 @@
+/* Reset & Standard Layout */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #212529;
+    overflow-x: hidden;
+}
+
+/* SECTION 1: EYE Mode (100vw x 100vh full-screen iframe) */
+#div1 {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+#div1 iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+/* SECTION 2: ATTENDANCE Mode (Full Viewport Camera Terminal) */
+#div2 {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+}
+
+.full-camera-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.full-camera-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.full-camera-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Minimal Top Overlay Status Bar over Camera */
+.top-overlay-bar {
+    pointer-events: none;
+}
+
+.top-overlay-bar * {
+    pointer-events: auto;
+}
+
+.opacity-90 {
+    opacity: 0.9;
+}
+
+/* Translucent 2-Second Temporary Recognition Overlay */
+.recognition-overlay {
+    position: absolute;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    min-width: 320px;
+    max-width: 90%;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 16px 28px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    animation: fadeInOverlay 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 15px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* SECTION 3: MANAGE FACES Layout */
+.mode-section {
+    min-height: 100vh;
+}
+
+.app-header {
+    height: 56px;
+    z-index: 100;
+}
+
+.main-content {
+    flex: 1;
+}
+
+/* Startup Screen Overlay */
+.startup-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.startup-card {
+    max-width: 400px;
+    width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+}
+
+/* Portrait Warning Banner */
+.portrait-warning-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9990;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Table & Helper Styling */
+.table-responsive {
+    border-radius: 0 0 16px 16px;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 576px) {
+    .recognition-overlay {
+        bottom: 20px;
+        padding: 12px 20px;
+        min-width: 280px;
+    }
+}

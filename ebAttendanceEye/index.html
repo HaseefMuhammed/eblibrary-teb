@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDU BOT AI — SMART ATTENDANCE</title>
+    <!-- App Favicon -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <!-- Bootstrap 5 CSS -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Initial Loading Overlay / Startup Screen -->
+    <div id="startupLoader" class="startup-screen">
+        <div class="startup-card text-center p-4">
+            <div class="mb-3">
+                <img src="icon.png" alt="EDU BOT AI Logo" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h3 class="fw-bold mb-1 text-dark">EDU BOT AI</h3>
+            <h6 class="text-muted mb-3">Smart Attendance System</h6>
+            <div id="startupStatus" class="badge bg-info text-dark fs-6 px-3 py-2">Loading face recognition...</div>
+        </div>
+    </div>
+
+    <!-- Portrait Orientation Warning Banner -->
+    <div id="portraitWarning" class="portrait-warning-banner d-none">
+        <div class="d-flex align-items-center justify-content-center gap-2 py-2 px-3 bg-warning text-dark fw-semibold">
+            <i class="bi bi-arrow-repeat fs-5"></i>
+            <span>↻ Rotate your device to landscape for the best experience</span>
+        </div>
+    </div>
+
+    <!-- SECTION 1: EYE (ThingSpeak Field 1 = 1) -->
+    <div id="div1">
+        <iframe
+            src="https://edubotog.netlify.app/os/eye/"
+            allow="fullscreen"
+            title="EDU BOT AI Eye">
+        </iframe>
+    </div>
+
+    <!-- SECTION 2: ATTENDANCE (ThingSpeak Field 1 = 2) - FULL VIEWPORT CAMERA TERMINAL -->
+    <div id="div2" class="mode-section d-none position-relative w-100 h-100 overflow-hidden bg-black">
+        <!-- Top Minimal Status Overlay -->
+        <div class="top-overlay-bar position-absolute top-0 start-0 w-100 d-flex justify-content-between align-items-center p-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-dark text-white border border-secondary px-3 py-2 opacity-90 shadow-sm d-flex align-items-center gap-2">
+                    <img src="icon.png" alt="Logo" style="width: 20px; height: 20px; object-fit: contain;"> EDU BOT AI
+                </span>
+                <span id="cameraActiveBadge" class="badge bg-success text-white border border-success px-3 py-2 opacity-90 shadow-sm">
+                    <i class="bi bi-camera-video-fill me-1"></i> CAMERA ACTIVE
+                </span>
+                <span id="faceRecognitionBadge" class="badge bg-info text-dark border border-info px-3 py-2 opacity-90 shadow-sm d-none d-md-inline-block">
+                    <i class="bi bi-person-check-fill me-1"></i> RECOGNITION READY
+                </span>
+            </div>
+
+            <!-- Manual Mode Switcher Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-sm btn-dark text-white border border-secondary dropdown-toggle opacity-90 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-gear me-1"></i> Mode
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><h6 class="dropdown-header">Switch Mode (Manual)</h6></li>
+                    <li><a class="dropdown-item" href="#" onclick="switchMode(1); return false;"><i class="bi bi-eye me-2"></i>Mode 1: Eye</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="switchMode(2); return false;"><i class="bi bi-person-check me-2"></i>Mode 2: Attendance</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="switchMode(3); return false;"><i class="bi bi-people me-2"></i>Mode 3: Manage Faces</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Full Viewport Camera & Bounding Canvas -->
+        <div class="full-camera-container w-100 h-100 position-relative">
+            <video id="attendanceVideo" autoplay playsinline muted></video>
+            <canvas id="attendanceCanvas"></canvas>
+        </div>
+
+        <!-- Translucent 2-Second Temporary Student Recognition Overlay -->
+        <div id="recognitionOverlay" class="recognition-overlay d-none">
+            <div class="text-center">
+                <div id="overlayBadge" class="badge bg-success px-3 py-2 fs-6 mb-2">
+                    <i class="bi bi-check-circle-fill me-1"></i> ✓ ATTENDANCE MARKED
+                </div>
+                <h4 id="overlayStudentName" class="fw-bold text-white mb-1">Haseef Muhammed</h4>
+                <div class="d-flex justify-content-center align-items-center gap-3 text-white-50 small mt-1">
+                    <span>Admin No: <strong id="overlayAdminNo" class="text-white font-monospace">2026001</strong></span>
+                    <span>•</span>
+                    <span id="overlayTime" class="text-white font-monospace">09:32:14</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: MANAGE FACES & ATTENDANCE CONTROL (ThingSpeak Field 1 = 3) -->
+    <div id="div3" class="mode-section d-none">
+        <!-- Header -->
+        <header class="app-header d-flex align-items-center justify-content-between px-3 py-2 border-bottom bg-white shadow-sm">
+            <div class="d-flex align-items-center gap-2">
+                <img src="icon.png" alt="EDU BOT AI Logo" style="width: 28px; height: 28px; object-fit: contain;">
+                <h5 class="m-0 fw-bold">EDU BOT AI <span class="text-muted fs-6 fw-normal d-none d-sm-inline">| Smart Attendance</span></h5>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill px-3 py-2">
+                    <i class="bi bi-people me-1"></i> MANAGE FACES
+                </span>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear me-1"></i> Mode
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><h6 class="dropdown-header">Switch Mode (Manual)</h6></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchMode(1); return false;"><i class="bi bi-eye me-2"></i>Mode 1: Eye</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchMode(2); return false;"><i class="bi bi-person-check me-2"></i>Mode 2: Attendance</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchMode(3); return false;"><i class="bi bi-people me-2"></i>Mode 3: Manage Faces</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main class="container p-3 p-md-4 main-content">
+            <!-- Manage Faces Section -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h4 class="m-0 fw-bold text-dark">MANAGE FACES</h4>
+                        <p class="text-muted small m-0">Registered Student Face Descriptors (IndexedDB)</p>
+                    </div>
+                    <button class="btn btn-primary rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="prepareRegisterModal()">
+                        <i class="bi bi-person-plus-fill me-2"></i> Register Student
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Admin No.</th>
+                                    <th>Name</th>
+                                    <th>Registered Date</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Loading registered students...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Control Section -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 px-4">
+                    <h4 class="m-0 fw-bold text-dark">ATTENDANCE CONTROL</h4>
+                    <p class="text-muted small m-0">Session Reset Management</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h6 class="fw-bold mb-1">Start New Attendance Session</h6>
+                            <p class="text-muted small m-0">Clears the current session memory so students can be recognized again for a new session. Does not delete registered student faces or Google Sheet records.</p>
+                        </div>
+                        <button class="btn btn-success btn-lg rounded-pill px-4 fw-semibold text-nowrap shadow-sm" onclick="handleStartNewSession()">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i> START NEW SESSION
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header border-bottom py-3 px-4">
+                    <h5 class="modal-title fw-bold" id="registerModalLabel">
+                        <img src="icon.png" alt="Logo" style="width: 24px; height: 24px; object-fit: contain;" class="me-2">Register Student Face
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeRegisterModal()"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="registerForm" onsubmit="return false;">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="regAdminNo" class="form-label fw-semibold">Admin Number</label>
+                                <input type="text" class="form-control" id="regAdminNo" placeholder="e.g. 2026001" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="regStudentName" class="form-label fw-semibold">Student Name</label>
+                                <input type="text" class="form-control" id="regStudentName" placeholder="e.g. Haseef Muhammed" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <!-- Registration Camera & Sample Capture -->
+                        <div class="text-center">
+                            <div class="camera-wrapper mx-auto mb-3 bg-black rounded-3 position-relative" style="max-width: 480px; height: 320px; overflow: hidden;">
+                                <video id="regVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <canvas id="regCanvas" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+                                <div id="regCameraPlaceholder" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-dark text-white p-3">
+                                    <i class="bi bi-camera-video-off display-4 mb-2 text-secondary"></i>
+                                    <p class="m-0 text-muted">Camera is stopped</p>
+                                </div>
+                            </div>
+
+                            <!-- Sample Progress Tracker -->
+                            <div class="mb-3">
+                                <span id="sampleBadge" class="badge bg-secondary fs-6 px-3 py-2">
+                                    Samples: <span id="sampleCount">0</span> / 5
+                                </span>
+                                <div class="progress mt-2 mx-auto" style="max-width: 300px; height: 8px;">
+                                    <div id="sampleProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                <button type="button" id="btnStartRegCamera" class="btn btn-outline-primary" onclick="startRegistrationCamera()">
+                                    <i class="bi bi-camera me-1"></i> Start Camera
+                                </button>
+                                <button type="button" id="btnCaptureSample" class="btn btn-success" onclick="captureFaceSample()" disabled>
+                                    <i class="bi bi-aspect-ratio me-1"></i> Capture Face
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top py-3 px-4">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal" onclick="closeRegisterModal()">Cancel</button>
+                    <button type="button" id="btnSaveStudent" class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="saveStudentRegistration()" disabled>
+                        <i class="bi bi-check-circle me-1"></i> Register Student
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal (Replaces Native confirm() Popup) -->
+    <div class="modal fade" id="customConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="confirmModalTitle">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3" id="confirmModalBody">
+                    Are you sure you want to proceed?
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmModalActionBtn" class="btn btn-danger rounded-pill px-4">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Camera Error Alert Modal (Replaces Native alert() Popup) -->
+    <div class="modal fade" id="cameraErrorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+                <div class="mb-3">
+                    <img src="icon.png" alt="EDU BOT AI" style="width: 56px; height: 56px; object-fit: contain;">
+                </div>
+                <h4 class="fw-bold mb-2" id="cameraErrorTitle">⚠ Camera Access Required</h4>
+                <p class="text-muted mb-4" id="cameraErrorBody">Please allow camera access to start attendance recognition.</p>
+                <div>
+                    <button type="button" class="btn btn-primary rounded-pill px-5 fw-semibold" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+        <div id="appToast" class="toast align-items-center text-white bg-dark border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                    Notification message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+
+    <!-- Application Script Modules -->
+    <script src="js/db.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/face.js"></script>
+    <script src="js/attendance.js"></script>
+    <script src="js/thingspeak.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
