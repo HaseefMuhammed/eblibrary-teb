@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDU BOT AI — Inauguration Ceremony</title>
+    <meta name="description" content="Digital Inauguration Ceremony for EDU BOT AI. Powered by IoT ThingSpeak.">
+    <meta name="theme-color" content="#040677">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Google Fonts: Roboto, Raleway, Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Raleway:wght@500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <aside id="pwa-install-card" class="pwa-install-card" aria-labelledby="pwa-install-title" hidden>
+        <button id="pwa-install-dismiss" class="pwa-install-dismiss" type="button" aria-label="Dismiss install prompt">&times;</button>
+        <img src="icon.png" alt="" class="pwa-install-logo">
+        <div class="pwa-install-copy">
+            <h2 id="pwa-install-title">Install EDU BOT AI</h2>
+            <p id="pwa-install-message">Add the app to your device for quick access.</p>
+            <button id="pwa-install-button" class="pwa-install-button" type="button">
+                <i class="bi bi-download" aria-hidden="true"></i> Install app
+            </button>
+        </div>
+    </aside>
+
+    <!-- Canvas for Celebratory Party Poppers / Confetti Cannon Burst -->
+    <canvas id="popperCanvas" aria-hidden="true"></canvas>
+
+    <!-- MAIN CEREMONIAL STAGE -->
+    <main id="inauguration-stage" class="inauguration-stage" role="main">
+        <div class="stage-overlay"></div>
+
+        <!-- TOP HEADER BAR WITH RELAUNCH BUTTON -->
+        <header class="top-header-bar">
+            <div class="top-bar-brand">
+                <span class="pulse-dot"></span>
+                <span>EDU BOT AI CEREMONY</span>
+            </div>
+            <button id="topRelaunchBtn" class="relaunch-btn" title="Relaunch Ceremony & Send 0 to ThingSpeak">
+                <i class="bi bi-arrow-counterclockwise"></i> Relaunch
+            </button>
+        </header>
+
+        <div class="ceremony-container text-center">
+            
+            <!-- LOGO & BRANDING -->
+            <header class="ceremony-header">
+                <div class="logo-wrapper mb-3">
+                    <img 
+                        src="icon.png" 
+                        alt="EDU BOT AI" 
+                        class="ceremony-logo"
+                    >
+                </div>
+                <h1 class="brand-title">EDU BOT AI</h1>
+                <h2 class="brand-subtitle">AI-POWERED EDUCATION</h2>
+                <p class="brand-tagline">A NEW WAY TO LEARN</p>
+            </header>
+
+            <!-- CEREMONIAL RIBBON WITH SCISSORS -->
+            <div class="ribbon-container" id="ribbonContainer" aria-label="Ceremonial Ribbon" role="button" tabindex="0" title="Click to inaugurate EDU BOT AI">
+                
+                <!-- Ceremonial Golden Scissors -->
+                <div class="ceremonial-scissors" id="ceremonialScissors" aria-hidden="true">
+                    <svg class="scissors-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left Blade & Gold Handle -->
+                        <g class="blade-left">
+                            <ellipse cx="28" cy="78" rx="14" ry="10" stroke="#d4af37" stroke-width="4" fill="rgba(212,175,55,0.2)"/>
+                            <path d="M35 70 L50 50 L88 20 L50 48 Z" fill="url(#goldGradBlade)" stroke="#c59b27" stroke-width="1.5"/>
+                        </g>
+                        <!-- Right Blade & Gold Handle -->
+                        <g class="blade-right">
+                            <ellipse cx="72" cy="78" rx="14" ry="10" stroke="#d4af37" stroke-width="4" fill="rgba(212,175,55,0.2)"/>
+                            <path d="M65 70 L50 50 L12 20 L50 48 Z" fill="url(#goldGradBlade)" stroke="#c59b27" stroke-width="1.5"/>
+                        </g>
+                        <!-- Pivot Screw -->
+                        <circle cx="50" cy="50" r="4.5" fill="#fff176" stroke="#b28900" stroke-width="2"/>
+                        <defs>
+                            <linearGradient id="goldGradBlade" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fff59d"/>
+                                <stop offset="50%" stop-color="#ffd54f"/>
+                                <stop offset="100%" stop-color="#ffb300"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- Complete Ribbon Structure -->
+                <div class="ceremony-ribbon" id="ceremonyRibbon">
+                    <!-- Left Satin Ribbon Strip with Gold Trims -->
+                    <div class="ribbon-left" id="ribbonLeft">
+                        <div class="ribbon-gold-trim trim-top"></div>
+                        <div class="ribbon-fabric"></div>
+                        <div class="ribbon-gold-trim trim-bottom"></div>
+                        <div class="ribbon-sheen"></div>
+                    </div>
+
+                    <!-- Center Knot with Hanging Ribbon Tails -->
+                    <div class="ribbon-center" id="ribbonCenter">
+                        <div class="ribbon-tail tail-left"></div>
+                        <div class="ribbon-tail tail-right"></div>
+                        <span class="ribbon-knot"></span>
+                        <span class="ribbon-rosette"></span>
+                        <div class="cut-flash" id="cutFlash"></div>
+                    </div>
+
+                    <!-- Right Satin Ribbon Strip with Gold Trims -->
+                    <div class="ribbon-right" id="ribbonRight">
+                        <div class="ribbon-gold-trim trim-top"></div>
+                        <div class="ribbon-fabric"></div>
+                        <div class="ribbon-gold-trim trim-bottom"></div>
+                        <div class="ribbon-sheen"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CEREMONIAL DETAILS & STATUS -->
+            <footer class="ceremony-footer">
+                <h3 class="ceremony-heading" id="ceremonyHeading">INAUGURATION CEREMONY</h3>
+                <p class="ceremony-instruction" id="ceremonyInstruction">Please proceed to inaugurate EDU BOT AI</p>
+
+                <div class="ceremony-status mt-4">
+                    <span class="status-indicator" id="statusIndicator">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span class="status-text" id="statusText">READY FOR INAUGURATION</span>
+                    </span>
+                </div>
+            </footer>
+
+        </div>
+    </main>
+
+    <!-- CEREMONY MESSAGE OVERLAY (Revealed upon ribbon cut) -->
+    <div id="ceremony-message-overlay" class="ceremony-message-overlay" aria-hidden="true">
+        <div class="message-content text-center">
+            <img 
+                src="icon.png" 
+                alt="EDU BOT AI" 
+                class="message-logo mb-3"
+            >
+            <div class="inaugurated-badge">INAUGURATED</div>
+            <h2 class="welcome-heading">WELCOME TO</h2>
+            <h1 class="welcome-title">EDU BOT AI</h1>
+            <div class="welcome-subline">THE FUTURE OF LEARNING STARTS NOW</div>
+        </div>
+    </div>
+
+    <!-- MINIMAL FULLSCREEN PROMPT -->
+    <div id="fullscreen-prompt" class="fullscreen-prompt d-none">
+        <button id="fullscreenBtn" class="btn btn-outline-light btn-sm rounded-pill px-3 shadow">
+            <i class="bi bi-arrows-fullscreen me-1"></i> Open Fullscreen
+        </button>
+    </div>
+
+    <!-- TARGET WEBSITE FULLSCREEN CONTAINER -->
+    <div id="website-container" class="website-container" aria-hidden="true">
+        <!-- Floating Minimal Toolbar (Slide down on hover) -->
+        <header class="website-toolbar" id="websiteToolbar">
+            <div class="toolbar-brand">
+                <img src="i" alt="" class="toolbar-logo">
+                <span>EDU BOT AI — LIVE PLATFORM</span>
+            </div>
+            <div class="toolbar-actions">
+                <button id="toolbarFullscreenBtn" class="toolbar-btn" title="Toggle Fullscreen">
+                    <i class="bi bi-arrows-fullscreen"></i> Fullscreen
+                </button>
+                <a href="https://edubotai.tebinnovations.in/" target="_blank" rel="noopener noreferrer" class="toolbar-btn" title="Open platform directly in new tab">
+                    <i class="bi bi-box-arrow-up-right"></i> Open Link
+                </a>
+                <button id="toolbarRelaunchBtn" class="toolbar-btn btn-relaunch-accent" title="Relaunch Ceremony (Sends 0)">
+                    <i class="bi bi-arrow-counterclockwise"></i> Relaunch
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading indicator while iframe initializes -->
+        <div id="iframeLoader" class="iframe-loader">
+            <div class="spinner-border text-success mb-3" role="status" style="width: 2.8rem; height: 2.8rem;"></div>
+            <div class="loader-title">OPENING EDU BOT AI</div>
+            <div class="loader-sub">https://edubotai.tebinnovations.in/</div>
+        </div>
+
+        <!-- The Target Iframe -->
+        <iframe
+            id="eduBotFrame"
+            src="https://edubotai.tebinnovations.in/"
+            title="EDU BOT AI Platform"
+            allow="fullscreen; autoplay; camera; microphone; clipboard-write; encrypted-media"
+            loading="lazy"
+        ></iframe>
+    </div>
+
+    <!-- Canvas Confetti Library CDN (Industry standard party popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+    <!-- Bootstrap 5 JS CDN -->
+    <script src="bootstrap/js/bootstrap.js"></script>
+
+    <!-- Main Logic Script -->
+    <script src="script.js"></script>
+</body>
+</html>

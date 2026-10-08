@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ThingSpeak Video Alert</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* =========================
+   PERMISSION MODAL
+========================= */
+
+#permissionModal {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background: rgba(0, 0, 0, 0.75);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.modal-box {
+    width: 90%;
+    max-width: 420px;
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 18px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-box h2 {
+    margin-bottom: 12px;
+}
+
+.modal-box p {
+    color: #666;
+    line-height: 1.5;
+}
+
+#closeModal {
+    margin-top: 25px;
+
+    padding: 12px 30px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #111;
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+/* =========================
+   VIDEO CONTAINER
+========================= */
+
+#videoContainer {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background: black;
+
+    display: none;
+
+    z-index: 5000;
+}
+
+/* =========================
+   VIDEO
+========================= */
+
+#alertVideo {
+    width: 100vw;
+    height: 100vh;
+
+    object-fit: cover;
+
+    display: block;
+}
+/* =========================
+   COMPACT TOP-RIGHT EXIT BUTTON (ABOVE VIDEO)
+========================= */
+
+#exitContainer {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 20000;
+    display: block;
+}
+
+#exitBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    background: rgba(229, 45, 39, 0.92);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+#exitBtn:hover {
+    background: #ff3b30;
+    color: #ffffff;
+    transform: scale(1.06);
+    box-shadow: 0 6px 20px rgba(255, 59, 48, 0.6);
+}
+
+#exitBtn:active {
+    transform: scale(0.96);
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- =========================
+     COMPACT EXIT BUTTON (ABOVE VIDEO LAYER)
+========================= -->
+
+<div id="exitContainer">
+    <a href="https://www.tebinnovations.in/" id="exitBtn" title="Exit to tebinnovations.in">
+        ✕ Exit
+    </a>
+</div>
+
+
+<!-- =========================
+     PERMISSION MODAL
+========================= -->
+
+<div id="permissionModal">
+
+    <div class="modal-box">
+
+        <h2>🔔 Alert System</h2>
+
+        <p>
+            Click Continue to enable video alerts with sound.
+        </p>
+
+        <button id="closeModal">
+            Continue
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     FULLSCREEN VIDEO
+========================= -->
+
+<div id="videoContainer">
+
+    <video
+        id="alertVideo"
+        playsinline
+        preload="auto"
+    >
+        <source src="alert.mp4" type="video/mp4">
+    </video>
+
+</div>
+
+
+<script>
+
+/* =========================================
+   THINGSPEAK CONFIGURATION
+========================================= */
+
+const CHANNEL_ID = "3525679";
+
+const READ_API_KEY = "TKS4NC7JB2EVAG7N";
+
+const FIELD = 1;
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const modal =
+    document.getElementById("permissionModal");
+
+const closeModal =
+    document.getElementById("closeModal");
+
+const videoContainer =
+    document.getElementById("videoContainer");
+
+const video =
+    document.getElementById("alertVideo");
+
+const exitContainer =
+    document.getElementById("exitContainer");
+
+
+/* =========================================
+   STATE
+========================================= */
+
+let audioUnlocked = false;
+
+let videoPlaying = false;
+
+
+/* =========================================
+   USER INTERACTION
+========================================= */
+
+closeModal.addEventListener("click", async () => {
+
+    modal.style.display = "none";
+
+    /*
+       Unlock audio/video playback.
+    */
+
+    try {
+
+        video.muted = false;
+
+        await video.play();
+
+        video.pause();
+
+        video.currentTime = 0;
+
+        audioUnlocked = true;
+
+        console.log("🔊 Audio unlocked");
+
+    } catch (error) {
+
+        console.error(
+            "Audio unlock failed:",
+            error
+        );
+
+    }
+
+});
+
+
+/* =========================================
+   PLAY ALERT VIDEO
+========================================= */
+
+async function playAlertVideo() {
+
+    if (!audioUnlocked) {
+
+        console.log(
+            "Waiting for user interaction..."
+        );
+
+        return;
+
+    }
+
+
+    if (videoPlaying) {
+        return;
+    }
+
+
+    videoPlaying = true;
+
+
+    videoContainer.style.display = "block";
+
+    video.currentTime = 0;
+
+    video.muted = false;
+
+
+    try {
+
+        await video.play();
+
+        console.log(
+            "🚨 ALERT VIDEO PLAYING"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Video play failed:",
+            error
+        );
+
+        videoPlaying = false;
+
+    }
+
+}
+
+
+/* =========================================
+   STOP ALERT VIDEO
+========================================= */
+
+function stopAlertVideo() {
+
+    if (!videoPlaying) {
+        return;
+    }
+
+
+    video.pause();
+
+    video.currentTime = 0;
+
+    videoContainer.style.display = "none";
+
+    videoPlaying = false;
+
+
+    console.log(
+        "⏹️ ALERT VIDEO STOPPED"
+    );
+
+}
+
+
+/* =========================================
+   THINGSPEAK CHECK
+========================================= */
+
+async function checkThingSpeak() {
+
+    try {
+
+        const url =
+            `https://api.thingspeak.com/channels/${CHANNEL_ID}/fields/${FIELD}/last.json?api_key=${READ_API_KEY}`;
+
+        const response =
+            await fetch(url);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "ThingSpeak request failed"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const value =
+            data[`field${FIELD}`];
+
+
+        console.log(
+            "ThingSpeak Field 1:",
+            value
+        );
+
+
+        /* =========================
+           VALUE = 1
+        ========================= */
+
+        if (value === "1") {
+
+            playAlertVideo();
+
+            if (exitContainer) {
+                exitContainer.style.display = "block";
+            }
+
+        }
+
+
+        /* =========================
+           VALUE = 0
+        ========================= */
+
+        else {
+
+            stopAlertVideo();
+
+            if (exitContainer) {
+                exitContainer.style.display = "block";
+            }
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "ThingSpeak Error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   CHECK EVERY 5 SECONDS
+========================================= */
+
+setInterval(
+    checkThingSpeak,
+    5000
+);
+
+
+/* =========================================
+   INITIAL CHECK
+========================================= */
+
+checkThingSpeak();
+
+</script>
+
+</body>
+</html>
